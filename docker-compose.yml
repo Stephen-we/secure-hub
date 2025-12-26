@@ -1,0 +1,65 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    volumes:
+      - mongodb_data:/data/db
+
+  server:
+    build: ./server
+    container_name: secure-hub-server
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://admin:password123@mongodb:27017/securehub?authSource=admin
+      - JWT_SECRET=your_jwt_secret_key_change_this_12345
+
+      # 🔐 OnlyOffice integration
+      - ONLYOFFICE_URL=http://onlyoffice
+      - ONLYOFFICE_JWT_SECRET=onlyoffice_secret_123
+      - SERVER_PUBLIC_URL=http://localhost:5000
+
+    volumes:
+      - ./server/uploads:/app/uploads
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      - mongodb
+      - onlyoffice
+
+  client:
+    build: ./client
+    container_name: secure-hub-client
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+
+  onlyoffice:
+    image: onlyoffice/documentserver:latest
+    container_name: onlyoffice
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - JWT_ENABLED=true
+      - JWT_SECRET=onlyoffice_secret_123
+    volumes:
+      - onlyoffice_data:/var/www/onlyoffice/Data
+
+volumes:
+  mongodb_data:
+  onlyoffice_data:

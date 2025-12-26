@@ -1,35 +1,34 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Types, Document } from "mongoose";
 
 export interface IMessage extends Document {
-  sender: string;
-  receiverType: "user" | "department" | "everyone";
-  receiverUser?: string;
-  receiverDepartment?: string;
+  sender: Types.ObjectId;
+  receiver?: Types.ObjectId;
+  room?: string;
   message: string;
-  attachment?: string;
-  attachmentType?: string; // image | file | folder
   createdAt: Date;
 }
 
 const MessageSchema = new Schema<IMessage>(
   {
-    sender: { type: Schema.Types.ObjectId, ref: "User", required: true },
-
-    receiverType: {
-      type: String,
-      enum: ["user", "department", "everyone"],
+    sender: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
 
-    receiverUser: { type: Schema.Types.ObjectId, ref: "User" },
+    receiver: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
 
-    receiverDepartment: { type: String },
+    room: {
+      type: String,
+    },
 
-    message: { type: String, default: "" },
-
-    attachment: { type: String }, // file path
-
-    attachmentType: { type: String }, // image/file/folder
+    message: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );

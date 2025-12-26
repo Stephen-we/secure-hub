@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-      "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-      "build": "tsc",
-      "start": "node dist/index.js"
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -33,7 +33,10 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
     "@types/node": "^24.10.1",
+    "@types/nodemailer": "^7.0.4",
+    "@types/request-ip": "^0.0.41",
     "@types/socket.io": "^3.0.1",
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",

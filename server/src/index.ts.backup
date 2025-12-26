@@ -23,39 +23,28 @@ dotenv.config();
 
 // ✅ 2. Create app BEFORE using it
 const app = express();
+app.use("/uploads", express.static("uploads"));
 
-// ✅ 3. Core middlewares - UPDATED CORS for Docker
-const corsOptions = {
-  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://client:5173',
-      'http://127.0.0.1:5173'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  optionsSuccessStatus: 200
-};
-
-app.use(cors(corsOptions));
+// ✅ 3. Core middlewares
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ 4. Serve static files from uploads
-app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+// 🔹 serve raw files (optional for debug / direct links)
+app.use("/uploads", express.static("uploads"));
 
-// ✅ 5. Logging middleware (runs for all requests)
+// API routes
+app.use("/api/auth", authRoutes);
+app.use("/api/files", fileRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/users", userRoutes);
+
+// ✅ 4. Logging middleware (runs for all requests)
 app.use(async (req: Request, res: Response, next: NextFunction) => {
   try {
     const ip = requestIp.getClientIp(req);
@@ -75,6 +64,12 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+// ✅ 5. Static uploads folder
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "../uploads"))
+);
+
 // ✅ 6. API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/files", fileRoutes);
@@ -91,7 +86,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:5173', 'http://client:5173'],
+    origin: "http://localhost:5173",
     credentials: true,
   },
 });
